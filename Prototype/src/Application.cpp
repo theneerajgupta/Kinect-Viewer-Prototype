@@ -5,6 +5,27 @@
 #include <fstream>              // file stream that deal with reading files
 #include <sstream>              // string stream to contain long strings that hold shaders
 
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError() {
+    // Clear all errors
+    while (glGetError() != GL_NO_ERROR) {
+
+    }
+}
+
+static bool GLLogCall(const char* function, const char* file, int line) {
+    while (GLenum error = glGetError()) {
+        std::cout << "[OpenGL Error] (" << function << " , " << file << " , " << line << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
 struct ShaderProgramSource {
     std::string VertexSource;
     std::string FragmentSource;
@@ -131,12 +152,14 @@ int main(void) {
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);                                 // Creating Shaders
     glUseProgram(shader);                                                                                           // Apply Shaders
 
+
+
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // DRAWING A TRIANLGE
         //glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
 
         glfwSwapBuffers(window);
