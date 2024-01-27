@@ -112,6 +112,7 @@ int main(void) {
     }
 
     glfwMakeContextCurrent(window);                                                                                 // Setting Window as Current Context
+    glfwSwapInterval(1);                                                                                            // VSync On
 
     if (glewInit() != GLEW_OK)                                                                                      // Initializing GLEW after Context Created/Set
         std::cout << "Error!" << std::endl;
@@ -152,15 +153,29 @@ int main(void) {
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);                                 // Creating Shaders
     glUseProgram(shader);                                                                                           // Apply Shaders
 
+    // USING UNIFORMS TO FEED INFORMATION TO SHADER
+    int location = glGetUniformLocation(shader, "u_Color");
+    ASSERT(location != -1);
+    glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
 
+    // UNIFORM VARIABLES
+    float red_channel = 0.0f;
+    float increment = 0.05f;
 
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // DRAWING A TRIANLGE
         //glDrawArrays(GL_TRIANGLES, 0, 6);
+        glUniform4f(location, red_channel, 0.3f, 0.8f, 1.0f);
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
+        if (red_channel > 1.0f)
+            increment = -0.05f;
+        else if (red_channel < 0.0f)
+            increment = 0.05f;
+
+        red_channel += increment;
 
         glfwSwapBuffers(window);
         glfwPollEvents();
