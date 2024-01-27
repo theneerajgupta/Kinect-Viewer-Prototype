@@ -105,6 +105,10 @@ int main(void) {
     if (!glfwInit())                                                                                                // Initialize GLFW
         return -1;
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);                                                 // Setting Window Params
     if (!window) {
         glfwTerminate();                                                                            
@@ -112,10 +116,16 @@ int main(void) {
     }
 
     glfwMakeContextCurrent(window);                                                                                 // Setting Window as Current Context
-    glfwSwapInterval(1);                                                                                            // VSync On
+    glfwSwapInterval(1);                                                                                            // Set VSync On
 
     if (glewInit() != GLEW_OK)                                                                                      // Initializing GLEW after Context Created/Set
         std::cout << "Error!" << std::endl;
+
+    
+    // VERTEX ARRAY OBJECT
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
 
     // VERTEX DATA
@@ -130,7 +140,7 @@ int main(void) {
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
     
     // VERTEX ATTRIBUTES
     glEnableVertexAttribArray(0);
@@ -158,6 +168,26 @@ int main(void) {
     ASSERT(location != -1);
     glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
 
+
+
+
+
+    // UNBIND EVERYTHING
+    glBindVertexArray(0);
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+
+
+
+
+
+
+
+
+
     // UNIFORM VARIABLES
     float red_channel = 0.0f;
     float increment = 0.05f;
@@ -166,8 +196,15 @@ int main(void) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // DRAWING A TRIANLGE
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-        glUniform4f(location, red_channel, 0.3f, 0.8f, 1.0f);
+        
+        glUseProgram(shader);                                                               // bind shader
+        glUniform4f(location, red_channel, 0.3f, 0.8f, 1.0f);                               // set uniform
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);                                         // bind index buffer
+            
+
+
+        
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         if (red_channel > 1.0f)
