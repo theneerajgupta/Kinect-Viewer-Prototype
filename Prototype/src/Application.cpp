@@ -5,32 +5,18 @@
 #include <fstream>              // file stream that deal with reading files
 #include <sstream>              // string stream to contain long strings that hold shaders
 
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-static void GLClearError() {
-    // Clear all errors
-    while (glGetError() != GL_NO_ERROR) {
-
-    }
-}
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-    while (GLenum error = glGetError()) {
-        std::cout << "[OpenGL Error] (" << function << " , " << file << " , " << line << std::endl;
-        return false;
-    }
-    return true;
-}
+#include "Renderer.h"           // holds renderer + GLCall Macro
+#include "VertexBuffer.h"       // Vertex Buffer Code
+#include "IndexBuffer.h"        // Index Buffer Code
 
 
+// struct to store multiple shader src
 struct ShaderProgramSource {
     std::string VertexSource;
     std::string FragmentSource;
 };
 
+// file parser to load shaders
 static ShaderProgramSource ParseShader(const std::string& filepath) {
     std::ifstream stream(filepath);
 
@@ -59,6 +45,7 @@ static ShaderProgramSource ParseShader(const std::string& filepath) {
     return { ss[0].str(), ss[1].str() };
 }
 
+// function that compiles shaders
 static unsigned int CompileShader(unsigned int type, const std::string& source) {
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
@@ -137,10 +124,7 @@ int main(void) {
     };
 
     // VERTEX BUFFERS
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
     
     // VERTEX ATTRIBUTES
     glEnableVertexAttribArray(0);
@@ -153,10 +137,7 @@ int main(void) {
     };
 
     // INDEX BUFFER (Keeps track of different vertexes)
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * 3 * sizeof(unsigned int), indicies, GL_STATIC_DRAW);
+    IndexBuffer ib(indicies, 2 * 3);
 
     // SHADERS                                                                                                                      
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");                                           // Loading Shaders
@@ -200,8 +181,7 @@ int main(void) {
         glUseProgram(shader);                                                               // bind shader
         glUniform4f(location, red_channel, 0.3f, 0.8f, 1.0f);                               // set uniform
         glBindVertexArray(vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);                                         // bind index buffer
-            
+        ib.Bind();
 
 
         
