@@ -8,6 +8,7 @@
 #include "Renderer.h"           // holds renderer + GLCall Macro
 #include "VertexBuffer.h"       // Vertex Buffer Code
 #include "IndexBuffer.h"        // Index Buffer Code
+#include "VertexArray.h"
 
 
 // struct to store multiple shader src
@@ -108,11 +109,6 @@ int main(void) {
     if (glewInit() != GLEW_OK)                                                                                      // Initializing GLEW after Context Created/Set
         std::cout << "Error!" << std::endl;
 
-    
-    // VERTEX ARRAY OBJECT
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
 
 
     // VERTEX DATA
@@ -123,19 +119,22 @@ int main(void) {
         -0.5f,  0.5f, 
     };
 
-    // VERTEX BUFFERS
-    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-    
-    // VERTEX ATTRIBUTES
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (const void*) 0);
-
     // INDEX DATA
     unsigned int indicies[] = {
         0, 1, 2,
         2, 3, 0,
     };
 
+
+
+    VertexArray va;
+    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    VertexBufferLayout layout;
+    layout.Push<float>(2);
+    va.AddBuffer(vb, layout);
+    
+
+    
     // INDEX BUFFER (Keeps track of different vertexes)
     IndexBuffer ib(indicies, 2 * 3);
 
@@ -154,7 +153,7 @@ int main(void) {
 
 
     // UNBIND EVERYTHING
-    glBindVertexArray(0);
+    va.Unbind();
     glUseProgram(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -180,7 +179,8 @@ int main(void) {
         
         glUseProgram(shader);                                                               // bind shader
         glUniform4f(location, red_channel, 0.3f, 0.8f, 1.0f);                               // set uniform
-        glBindVertexArray(vao);
+        
+        va.Bind();
         ib.Bind();
 
 
