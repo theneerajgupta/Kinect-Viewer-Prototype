@@ -1,5 +1,9 @@
 #include "Shader.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>             // basic input and output fucntions
 #include <string>               // for string operations
 #include <fstream>              // file stream that deal with reading files
@@ -114,4 +118,14 @@ void Shader::Unbind() const {
 
 void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) {
     GLCall(glUniform4f(GetUniformLocation(name), v0, v1, v2, v3));
+}
+
+void Shader::SetUniformMVP(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
+{
+    unsigned int model_loc = GetUniformLocation("model");
+    unsigned int view_loc = GetUniformLocation("view");
+    unsigned int projection_loc = GetUniformLocation("projection");
+    glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projection_loc, 1, GL_FALSE, glm::value_ptr(projection));
 }

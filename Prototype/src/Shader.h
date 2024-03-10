@@ -25,6 +25,7 @@ public:
 	void Unbind() const;
 
 	void SetUniform4f(const std::string& location, float v0, float v1, float v2, float v3);
+	void SetUniformMVP(glm::mat4 model, glm::mat4 view, glm::mat4 projection);
 
 private:
 	ShaderProgramSource ParseShader(const std::string& filepath);
